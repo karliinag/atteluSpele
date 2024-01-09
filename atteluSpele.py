@@ -13,20 +13,31 @@ Answer_dict={}
 def btnClick(btn,number):
     global count, correctAnswer, Answer, Answer_dict
     if btn["bat.jpg"]=="pyimage6" and count<2:
-     btn["bat.jpg"]=imageList[number]
-     count+=1
-        Answer.append(number)
-        Answer_dict[btn]=imageList(number)
+        btn["bat.jpg"]=ImageList[number]
+    count+=1
+    Answer.append(number)
+    Answer_dict[btn]=ImageList[number]
+    if len(Answers)==2:
+        if ImageList[Answer[0]]==ImageList[Answer[1]]:
+            for key in Answer_dict:
+                key["state"]=DISABLED
+            correctAnswer+=2
+            if(correctAnswer==2):
+                 messagebox.showinfo("Vienādi attēli, uzminēji")
+                 correctAnswer=0
+            if(correctAnswer==6):
+                messagebox.askquestion("Vienādi attēli","Tu uzvarēji, vēlies spēlēt vēlreiz?")
+        else:
+            messagebox.showinfo("Vienādi attēli.","neuzminēji")
+            for key in Answer_dict:
+                key["Image"]=="pyiimage6"
+    
+        count=0
+        Answer=[]
+        Answer_dict={}
 
-    else:
-        messagebox.showinfo("Vienādi attēli, neuzminēji")
-        for key in Answer_dict:
-            key["image"]="pyimage6"
-count=0
-Answer=[]
-Answer_dict={}
-
-return 0
+        return 0
+ 
 
 myimg1=ImageTk.PhotoImage(Image.open("at1.jpg"))
 myimg2=ImageTk.PhotoImage(Image.open("at2.jpg"))
