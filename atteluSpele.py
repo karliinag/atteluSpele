@@ -1,126 +1,86 @@
-from cgitb import reset
-from tkinter import*
+from tkinter import *
 from PIL import ImageTk, Image
 import random
 from tkinter import messagebox
 
-gameWindow=Tk()
-gameWindow.title("atteluSpele")
+def resize_image(img_path, target_size):
+    original_image = Image.open(img_path)
+    resized_image = original_image.resize(target_size)
+    return ImageTk.PhotoImage(resized_image)
+
+def reset_cards():
+    for btn in buttons:
+        btn.config(image=bgImg, state=NORMAL)
+    global count, pairs_found, images
+    random.shuffle(images)
+    count = 0
+    pairs_found = 0
+
+def btnClick(btn, number):
+    global count, prev_btn, prev_number, pairs_found
+    if btn["state"] == NORMAL and count < 2:
+        btn.config(image=images[number])
+        count += 1
+        if count == 1:
+            prev_btn = btn
+            prev_number = number
+        elif count == 2:
+            btn.after(1000, lambda: check_match(btn, prev_btn, number, prev_number))
+
+def check_match(btn1, btn2, num1, num2):
+    global count, pairs_found
+    if images[num1] == images[num2]:
+        btn1.config(state=DISABLED)
+        btn2.config(state=DISABLED)
+        pairs_found += 1
+        if pairs_found == len(images) // 2:
+            messagebox.showinfo("Apsveicu,Tu uzvarēji!")
+            reset_cards()
+    else:
+        btn1.config(image=bgImg)
+        btn2.config(image=bgImg)
+    count = 0
+
+gameWindow = Tk()
+gameWindow.title("Memory Game")
 gameWindow.configure(bg="black")
 
+bgImg = resize_image("bat.jpg", (200, 300))
 
-myimg1=ImageTk.PhotoImage(Image.open("at1.jpg"))
-myimg2=ImageTk.PhotoImage(Image.open("at2.jpg"))
-myimg3=ImageTk.PhotoImage(Image.open("at3.jpg"))
-myimg4=ImageTk.PhotoImage(Image.open("at4.jpg"))
-myimg5=ImageTk.PhotoImage(Image.open("at5.jpg"))
-myimg6=ImageTk.PhotoImage(Image.open("at6.png"))
+myimg1 = resize_image("at1.jpg", (200, 300))
+myimg2 = resize_image("at2.jpg", (200, 300))
+myimg3 = resize_image("at3.jpg", (200, 300))
+myimg4 = resize_image("at4.jpg", (200, 300))
+myimg5 = resize_image("at5.jpg", (200, 300))
+myimg6 = resize_image("at6.png", (200, 300))
 
-ImageList=[myimg1,myimg1,myimg2,myimg2,myimg3,myimg3,myimg4,myimg4,myimg5,myimg5,myimg6,myimg6]
+images = [myimg1, myimg2, myimg3, myimg4, myimg5, myimg6, myimg1, myimg2, myimg3, myimg4, myimg5, myimg6]
+random.shuffle(images)
 
-bgImg=ImageTk.PhotoImage(Image.open("bat.jpg"))
+buttons = []
+for i in range(len(images)):
+    button = Button(width=200, height=300, image=bgImg, command=lambda i=i: btnClick(buttons[i], i))
+    button.grid(row=i // 4, column=i % 4)
+    buttons.append(button)
 
-btn0=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn0,0))
-btn1=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn1,1))
-btn2=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn2,2))
-btn3=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn3,3))
-btn4=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn4,4))
-btn5=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn5,5))
-btn6=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn6,6))
-btn7=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn7,7))
-btn8=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn8,8))
-btn9=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn9,9))
-btn10=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn10,10))
-btn11=Button(width=200,height=300,image=bgImg,command=lambda:btnClick(btn11,11))
+count = 0
+pairs_found = 0
+prev_btn = None
+prev_number = None
 
-btn0.grid(row=1, column=0)
-btn1.grid(row=2, column=0)
-btn2.grid(row=3, column=0)
-btn3.grid(row=1, column=1)
-btn4.grid(row=2, column=1)
-btn5.grid(row=3, column=1)
-btn6.grid(row=1, column=2)
-btn7.grid(row=2, column=2)
-btn8.grid(row=3, column=2)
-btn9.grid(row=1, column=3)
-btn10.grid(row=2, column=3)
-btn11.grid(row=3, column=3)
+menuBar = Menu(gameWindow)
+gameWindow.config(menu=menuBar)
 
-random.shuffle(ImageList)
+optionsMenu = Menu(menuBar, tearoff=False)
+menuBar.add_cascade(label="Ocijas", menu=optionsMenu)
+optionsMenu.add_command(label="Jauna spēle", command=reset_cards)
+optionsMenu.add_command(label="Iziet", command=gameWindow.quit)
 
-count=0
-correctanswer=0
-answer=[]
-answer_dict={}
-answercount=0
+infoMenu = Menu(menuBar, tearoff=False)
+menuBar.add_command(label="Kā spēlēt?", command=lambda: messagebox.showinfo("Atmiņas spēle", "Atrodi un uzklikšķini uz vienādajiem attēliem"))
 
-def reset():
-    global count,correctanswer, answer, answer_dict, answercount
-    btn0.config(state=NORMAL)
-    btn1.config(state=NORMAL)
-    btn2.config(state=NORMAL)
-    btn3.config(state=NORMAL)
-    btn4.config(state=NORMAL)
-    btn5.config(state=NORMAL)
-
-    btn0["image"]="pyimage7"
-    btn1["image"]="pyimage7"
-    btn2["image"]="pyimage7"
-    btn3["image"]="pyimage7"
-    btn4["image"]="pyimage7"
-    btn5["image"]="pyimage7"
-
-    random.shuffle(ImageList)
-
-    count=0
-    correctanswer=0
-    answer=[]
-    answer_dict={}
-    answercount=0       
-
-def infoLogs():
-  gameWindow=Toplevel()
-  gameWindow.title("Info par programmu")
-  gameWindow.geometry("500x300")
-  apraksts=Label(gameWindow,text="Tev ir jāatmin divas vienādas kartiņas")  
-  apraksts.grid(row=0, column=0)
-  return 0
-
-def btnClick(btn,number):
-    global count, correctanswer, answer, answer_dict
-    if btn["bat.jpg"]=="pyimage7" and count<2:
-        btn["bat.jpg"]=ImageList[number]
-    count+=1
-    answer.append(number)
-    answer_dict[btn]=ImageList[number]
-    if len(answer)==2:
-        if ImageList[answer[0]]==ImageList[answer[1]]:
-            for key in answer_dict:
-                key["state"]=DISABLED
-            correctanswer+=2
-            if(correctanswer==2):
-                 messagebox.showinfo("Vienādi attēli, uzminēji")
-                 correctanswer=0
-            if(correctanswer==6):
-                messagebox.askquestion("Vienādi attēli","Tu uzvarēji, vēlies spēlēt vēlreiz?")
-        else:
-            messagebox.showinfo("Vienādi attēli.","neuzminēji")
-            for key in answer_dict:
-                key["image"]=="pyiimage7"
-    
-        count=0
-        answer=[]
-        answer_dict={}
-
-        return 0
- 
-
-galvenaIzvele=Menu(gameWindow)
-gameWindow.config(menu=galvenaIzvele)
-
-opcijas=Menu(galvenaIzvele, tearoff=False)
-galvenaIzvele.add_cascade(label="Opcijas", menu=opcijas)
-opcijas.add_command(label="Jauna spēle", command=reset)
-opcijas.add_command(label="Iziet",command=gameWindow.quit)
-galvenaIzvele.add_command(label="Par programmu",command=infoLogs)
 gameWindow.mainloop()
+
+
+
+
